@@ -1,9 +1,17 @@
+cat << 'EOF' > ~/meow-meet/server.js
 const express = require('express');
+const path = require('path');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
-app.use(express.static('public'));
+// Explicitly serve static files from the absolute path of 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Catch-all route to serve index.html directly
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 io.on('connection', (socket) => {
   socket.on('join-room', (roomId) => {
@@ -21,4 +29,5 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log(`🐾 MeowMeet running at http://localhost:${PORT}`));
+http.listen(PORT, () => console.log(`🐾 MeowMeet running on port ${PORT}`));
+EOF
